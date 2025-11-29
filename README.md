@@ -1,4 +1,4 @@
-# Personal Neovim IDE Configuration
+![./logo.png]("./logo.png")
 
 A streamlined, modern Neovim IDE setup optimized for TypeScript, Vue, C/C++, and general development work.
 
