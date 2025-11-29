@@ -57,7 +57,7 @@ nvim --version
 
 2. **Clone this repository**:
    ```bash
-   git clone https://github.com/apeoverflow/nvim-config ~/.config/nvim
+   git clone https://github.com/apeoverflow/KW-IDE ~/.config/nvim
    ```
 
 3. **Install required tools**:
