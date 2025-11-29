@@ -132,28 +132,69 @@ return {
       vim.api.nvim_create_autocmd('FileType', {
         pattern = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
         callback = function(args)
-          vim.lsp.enable('ts_ls', { bufnr = args.buf })
+          vim.lsp.start({
+            name = 'ts_ls',
+            cmd = { 'typescript-language-server', '--stdio' },
+            root_dir = vim.fs.root(args.buf, { 'package.json', 'tsconfig.json', 'jsconfig.json', '.git' }),
+            capabilities = capabilities,
+          })
         end,
       })
 
       vim.api.nvim_create_autocmd('FileType', {
         pattern = { 'lua' },
         callback = function(args)
-          vim.lsp.enable('lua_ls', { bufnr = args.buf })
+          vim.lsp.start({
+            name = 'lua_ls',
+            cmd = { 'lua-language-server' },
+            root_dir = vim.fs.root(args.buf, { '.luarc.json', '.luarc.jsonc', '.luacheckrc', '.stylua.toml', 'stylua.toml', 'selene.toml', 'selene.yml', '.git' }),
+            capabilities = capabilities,
+            settings = {
+              Lua = {
+                runtime = { version = 'LuaJIT' },
+                diagnostics = { globals = { 'vim' } },
+                workspace = {
+                  checkThirdParty = false,
+                  library = {
+                    vim.env.VIMRUNTIME,
+                    "${3rd}/luv/library",
+                    "${3rd}/busted/library",
+                  },
+                },
+                telemetry = { enable = false },
+              },
+            },
+          })
         end,
       })
 
       vim.api.nvim_create_autocmd('FileType', {
         pattern = { 'vue' },
         callback = function(args)
-          vim.lsp.enable('volar', { bufnr = args.buf })
+          local root_dir = vim.fs.root(args.buf, { 'package.json', 'vite.config.ts', 'vite.config.js', 'vue.config.js', 'nuxt.config.js', '.git' })
+          vim.lsp.start({
+            name = 'volar',
+            cmd = { 'vue-language-server', '--stdio' },
+            root_dir = root_dir,
+            capabilities = capabilities,
+            init_options = {
+              typescript = {
+                tsdk = get_typescript_server_path(root_dir)
+              },
+            },
+          })
         end,
       })
 
       vim.api.nvim_create_autocmd('FileType', {
         pattern = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'proto' },
         callback = function(args)
-          vim.lsp.enable('clangd', { bufnr = args.buf })
+          vim.lsp.start({
+            name = 'clangd',
+            cmd = { 'clangd', '--background-index', '--clang-tidy' },
+            root_dir = vim.fs.root(args.buf, { '.clangd', '.clang-tidy', '.clang-format', 'compile_commands.json', 'compile_flags.txt', 'configure.ac', '.git' }),
+            capabilities = capabilities,
+          })
         end,
       })
 
@@ -162,6 +203,17 @@ return {
       vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic message' })
       vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = 'Open floating diagnostic message' })
       vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics list' })
+
+      -- Ensure on_attach runs for all LSP clients
+      vim.api.nvim_create_autocmd('LspAttach', {
+        group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+        callback = function(ev)
+          local client = vim.lsp.get_client_by_id(ev.data.client_id)
+          if client then
+            on_attach(client, ev.buf)
+          end
+        end,
+      })
     end,
   },
 }
