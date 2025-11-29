@@ -1,4 +1,4 @@
-![./logo.png]("./logo.png")
+![logo](./logo.png)
 
 A streamlined, modern Neovim IDE setup optimized for TypeScript, Vue, C/C++, and general development work.
 
