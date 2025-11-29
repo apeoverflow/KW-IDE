@@ -23,8 +23,19 @@ return {
     end,
   },
 
-  -- Vim sneak for quick navigation
-  { 'justinmk/vim-sneak' },
+  -- Vim sneak for quick navigation (disable gd mapping to preserve LSP goto definition)
+  {
+    'justinmk/vim-sneak',
+    init = function()
+      -- Prevent vim-sneak from mapping gd (preserve LSP goto definition)
+      vim.g['sneak#textobject_z'] = 0
+    end,
+    config = function()
+      -- Unmap gd after sneak loads to ensure LSP gd works
+      pcall(vim.keymap.del, 'n', 'gd')
+      pcall(vim.keymap.del, 'x', 'gd')
+    end
+  },
 
   -- Directory buffer
   { "elihunter173/dirbuf.nvim" },

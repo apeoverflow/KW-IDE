@@ -113,6 +113,9 @@ map('n', '<A-l>', '<C-w>l', { noremap = true, silent = true })
 -- Alt + 3 for # (from old config)
 map('i', '<A-3>', '#', { noremap = true, silent = true })
 
+-- Toggle search highlight
+map('n', '<leader>h', ':noh<CR>', { noremap = true, silent = true, desc = 'Clear search highlight' })
+
 -- Tab navigation
 map('n', '<C-a>', ':tabprevious<CR>', { noremap = true, silent = true })
 
@@ -274,6 +277,9 @@ vim.defer_fn(function()
 
   -- Outline toggle
   map('n', '<space>o', '<cmd>Outline<CR>', { desc = 'Toggle outline' })
+
+  -- Copilot manual trigger - open panel with suggestions
+  vim.keymap.set('i', '<C-g>', '<cmd>Copilot panel<CR>', { desc = 'Open Copilot panel' })
 
   -- LazyGit
   map('n', '<leader>lg', function()
