@@ -2,6 +2,100 @@
 
 A streamlined, modern Neovim IDE setup optimized for TypeScript, Vue, C/C++, and general development work.
 
+## Getting Started
+
+### Installing Neovim with Bob (Version Manager)
+
+[Bob](https://github.com/MordechaiHadad/bob) is a cross-platform Neovim version manager that makes it easy to install and switch between different Neovim versions.
+
+#### Install Bob
+
+**macOS/Linux:**
+```bash
+# Using Homebrew (macOS/Linux)
+brew install bob
+
+# Or using Cargo (Rust package manager)
+cargo install bob-nvim
+```
+
+**Windows:**
+```powershell
+# Using Scoop
+scoop install bob
+
+# Or using Cargo
+cargo install bob-nvim
+```
+
+#### Install Neovim with Bob
+
+```bash
+# Install the latest stable version
+bob install stable
+
+# Or install a specific version
+bob install 0.11.0
+
+# Set the installed version as default
+bob use stable
+```
+
+#### Verify Installation
+
+```bash
+nvim --version
+# Should show Neovim v0.11.0 or later
+```
+
+### Installing This Configuration
+
+1. **Backup existing config** (if you have one):
+   ```bash
+   mv ~/.config/nvim ~/.config/nvim.backup
+   ```
+
+2. **Clone this repository**:
+   ```bash
+   git clone https://github.com/yourusername/nvim-config ~/.config/nvim
+   ```
+
+3. **Install required tools**:
+   ```bash
+   # Node.js (for TypeScript/Vue LSPs)
+   # macOS:
+   brew install node
+   
+   # ripgrep (for better search)
+   brew install ripgrep
+   
+   # Install language servers globally
+   npm install -g @vue/language-server typescript typescript-language-server
+   ```
+
+4. **Launch Neovim**:
+   ```bash
+   nvim
+   ```
+   
+   On first launch:
+   - Lazy.nvim will automatically install all plugins
+   - TreeSitter parsers will be installed automatically
+   - The start page will appear once everything is loaded
+
+5. **Install additional LSP servers** (optional):
+   - Press `<Space>` then type and run `:Mason`
+   - Select and install servers for your languages (e.g., `clangd`, `pyright`)
+
+### Quick Start After Installation
+
+1. **Open a file**: `nvim myfile.ts`
+2. **Toggle file explorer**: Press `Ctrl+B`
+3. **Search files**: Press `<Space>sf`
+4. **Open terminal**: Press `Ctrl+N`
+
+See the [Quick Reference Card](#quick-reference-card) below for more keybindings.
+
 ## Features Overview
 
 ### Core Capabilities
