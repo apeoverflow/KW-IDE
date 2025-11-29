@@ -380,4 +380,3 @@ Create new files in `lua/plugins/` or modify existing ones. The setup automatica
 - **TreeSitter** parsers auto-install
 - **ripgrep** recommended for better grep performance
 
-This configuration provides a powerful, efficient development environment while remaining maintainable and extensible.
