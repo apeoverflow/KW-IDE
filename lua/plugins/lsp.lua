@@ -87,13 +87,36 @@ return {
         },
       }
 
-      -- Configure Vue LSP (Volar)
+      -- Configure Vue LSP (Volar) - optimized for Vue 3
+      local function get_typescript_server_path(root_dir)
+        local project_root = root_dir or vim.fn.getcwd()
+        local found = vim.fn.glob(project_root .. '/node_modules/typescript/lib', false, true)
+        if found and #found > 0 then
+          return found[1]
+        end
+        local global_ts = vim.fn.system('npm root -g'):gsub('\n', '') .. '/typescript/lib'
+        if vim.fn.isdirectory(global_ts) == 1 then
+          return global_ts
+        end
+        return ''
+      end
+
       vim.lsp.config.volar = {
         cmd = { 'vue-language-server', '--stdio' },
         filetypes = { 'vue' },
-        root_markers = { 'package.json', 'vue.config.js', 'vite.config.js', '.git' },
+        root_markers = { 'package.json', 'vite.config.ts', 'vite.config.js', 'vue.config.js', 'nuxt.config.js', '.git' },
         capabilities = capabilities,
-        on_attach = on_attach,
+        on_attach = function(client, bufnr)
+          on_attach(client, bufnr)
+        end,
+        on_new_config = function(new_config, new_root_dir)
+          new_config.init_options.typescript.tsdk = get_typescript_server_path(new_root_dir)
+        end,
+        init_options = {
+          typescript = {
+            tsdk = get_typescript_server_path(nil)
+          },
+        },
       }
 
       -- Configure Clang LSP
