@@ -33,10 +33,10 @@ return {
         '║   ╚═╝  ╚═╝ ╚══╝╚══╝       ╚═╝╚═════╝ ╚══════╝  ║ ',
         '╚════════════════════════════════════════════════╝ ',
         '',
-        '    Find Files      <Leader>ff    Help           <Leader>sh',
-        '    Recent Files    <Leader>?     Live Grep      <Leader>sg',
-        '    File Browser    <Ctrl>b       Git Files      <Leader>ff',
-        '    Terminal        <Ctrl>n       Objects Panel  <Space>o',
+        '    Find Files      Space ff     Help           Space sh',
+        '    Recent Files    Space ?      Live Grep      Space sg',
+        '    File Browser    Ctrl b       Git Files      Space ff',
+        '    Terminal        Ctrl n       Objects Panel  Space o',
         ''
       }
     end,
