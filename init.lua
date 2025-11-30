@@ -99,6 +99,7 @@ vim.api.nvim_exec([[
 
 map('n', '<C-n>', ':call OpenTerminal()<CR>', { desc = 'Open terminal' })
 map('t', '<C-x>', '<C-\\><C-n>', { noremap = true, silent = true })
+map('t', '<C-c>', '<C-\\><C-n>:q<CR>', { noremap = true, silent = true })
 
 -- Alt+hjkl to move between split/vsplit panels
 map('t', '<A-h>', '<C-\\><C-n><C-w>h', { noremap = true, silent = true })
@@ -289,5 +290,17 @@ vim.defer_fn(function()
       print('LazyGit plugin not loaded')
     end
   end, { desc = 'Open LazyGit' })
+
+  -- Manual lookup for word under cursor
+  map('n', '<leader>cm', function()
+    local word = vim.fn.expand('<cword>')
+    if word and word ~= '' then
+      vim.cmd('split')
+      vim.cmd('terminal man ' .. word)
+      vim.cmd('resize 15')
+    else
+      print('No word under cursor')
+    end
+  end, { desc = 'Search word under cursor in manual' })
 
 end, 100)
