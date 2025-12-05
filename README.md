@@ -1,6 +1,6 @@
 ![logo](./logo.png)
 
-A streamlined, modern Neovim IDE setup optimized for TypeScript, Vue, C/C++, and general development work.
+A streamlined, modern Neovim IDE setup optimized for TypeScript, Vue, C/C++, Dart/Flutter, and general development work.
 
 ## Getting Started
 
@@ -101,7 +101,7 @@ See the [Quick Reference Card](#quick-reference-card) below for more keybindings
 ### Core Capabilities
 - **Smart File Navigation** - Jump to files and definitions across languages
 - **Integrated Terminal** - Built-in terminal with quick access
-- **Multi-Language LSP Support** - TypeScript, Vue, C/C++, Lua
+- **Multi-Language LSP Support** - TypeScript, Vue, C/C++, Dart/Flutter, Lua
 - **File Explorer** - Tree-style file browser
 - **Fuzzy Finding** - Fast file and text search
 - **Code Outline** - Symbol/function overview panel
@@ -173,11 +173,105 @@ See the [Quick Reference Card](#quick-reference-card) below for more keybindings
 - **Clang-tidy** integration for code quality
 - **Background indexing** for large projects
 
+### Dart/Flutter (FVM Support)
+- **FVM Integration** - Automatic detection and usage of FVM Flutter versions
+- **Dart LSP** - Full language server with FVM-managed Dart SDK
+- **Flutter Tools** - Hot reload, debugging, device management
+- **Smart Commands** - Auto-detects FVM projects vs global Flutter
+- **Debugging Support** - DAP integration with breakpoints and variable inspection
+
 ### General
 - **Syntax highlighting** via TreeSitter
 - **Auto-indentation** and formatting
 - **Git integration** with LazyGit
 - **GitHub Copilot** suggestions
+
+---
+
+## Dart/Flutter Development Setup
+
+### Prerequisites
+1. **Install Flutter & Dart**:
+   ```bash
+   # Install Flutter (follow official instructions)
+   # https://docs.flutter.dev/get-started/install
+
+   # Or use FVM for Flutter version management (recommended)
+   dart pub global activate fvm
+   ```
+
+2. **FVM Setup** (Recommended):
+   ```bash
+   # Install FVM globally
+   dart pub global activate fvm
+
+   # In your Flutter project
+   fvm install stable
+   fvm use stable
+   ```
+
+### Features
+
+#### Automatic FVM Detection
+The configuration automatically detects and uses FVM when available:
+- ✅ Detects `.fvmrc` or `.fvm/fvm_config.json` files
+- ✅ Uses `fvm flutter` commands in FVM projects
+- ✅ Falls back to global Flutter in non-FVM projects
+- ✅ Dart LSP uses correct FVM Flutter/Dart version
+
+#### Flutter Commands
+| Command | Description |
+|---------|-------------|
+| `:FlutterDoctor` | Run flutter doctor (FVM-aware) |
+| `:FlutterPubGet` | Run flutter pub get |
+| `:FlutterPubUpgrade` | Run flutter pub upgrade |
+| `:FlutterClean` | Run flutter clean |
+
+#### Key Bindings
+| Key | Mode | Action |
+|-----|------|--------|
+| `<Space>li` | Normal | **LSP info** (shows FVM status) |
+| `<Leader>fr` | Normal | **Flutter run** (FVM-aware) |
+| `<Leader>fh` | Normal | **Flutter hot reload** |
+| `<Leader>fR` | Normal | **Flutter restart** |
+| `<Leader>fd` | Normal | **Flutter devices** |
+| `<Leader>fe` | Normal | **Flutter emulators** |
+| `<Leader>fo` | Normal | **Flutter outline toggle** |
+| `<Leader>fp` | Normal | **Open pubspec.yaml** |
+| `<Leader>fm` | Normal | **Open lib/main.dart** |
+| `<F5>` | Normal | **Start/Continue debugging** |
+| `<F1>` | Normal | **Debug step into** |
+| `<F2>` | Normal | **Debug step over** |
+| `<F3>` | Normal | **Debug step out** |
+| `<Leader>b` | Normal | **Toggle breakpoint** |
+
+#### Terminal Integration
+- `<Leader>fr` - Opens Flutter run terminal (auto-detects FVM)
+- `<Leader>ft` - Opens Flutter test terminal (auto-detects FVM)
+- Terminals use appropriate Flutter version (FVM or global)
+
+#### Testing Your Setup
+1. **Open a Flutter project**:
+   ```bash
+   cd your-flutter-project
+   nvim lib/main.dart
+   ```
+
+2. **Check LSP status**: Press `<Space>li`
+   - Should show Dart LSP connected
+   - Should display FVM version if using FVM
+   - Should show correct Dart SDK version
+
+3. **Test Flutter commands**: Try `:FlutterDoctor`
+   - Should run quickly and close (means no issues)
+   - Uses FVM automatically in FVM projects
+
+#### Debugging Setup
+- **DAP Integration** - Full debugging support with `nvim-dap`
+- **Breakpoints** - Set with `<Leader>b`, visual indicators in gutter
+- **Variable Inspection** - Hover over variables during debugging
+- **Step Debugging** - Use F1/F2/F3 for step into/over/out
+- **Debug UI** - Automatic debug panel with variables, call stack, etc.
 
 ---
 
@@ -260,6 +354,7 @@ Intelligently handles different file types:
 │       ├── git.lua         # LazyGit integration (floating window)
 │       ├── lsp.lua         # Language servers (modern vim.lsp.config)
 │       ├── nvim-tree.lua   # File explorer
+│       ├── flutter.lua     # Flutter/Dart development tools with FVM support
 │       ├── startpage.lua   # Custom start screen
 │       ├── telescope.lua   # Fuzzy finder
 │       ├── treesitter.lua  # Syntax highlighting
@@ -335,6 +430,13 @@ Each plugin has its own configuration file for maintainability:
 - Verify zsh is installed and in PATH
 - Try manual command: `:split term://zsh`
 
+**Flutter/Dart Issues**
+- Check FVM status with `<Space>li` - should show FVM version if detected
+- Verify Flutter installation: `flutter --version` (or `fvm flutter --version`)
+- Check Dart LSP connection: `:LspInfo` should show `dartls` attached
+- For FVM projects, ensure `.fvmrc` or `.fvm/fvm_config.json` exists
+- Test Flutter commands manually: `:FlutterDoctor` should run without errors
+
 ---
 
 ## Customization
@@ -374,6 +476,8 @@ Create new files in `lua/plugins/` or modify existing ones. The setup automatica
 - **Mason** (for LSP server installation)
 - **Node.js** (for TypeScript/Vue language servers)
 - **clangd** (for C/C++ support)
+- **Flutter SDK** (for Dart/Flutter development)
+- **FVM** (optional, for Flutter version management)
 
 ### External Dependencies
 - **telescope-fzf-native** requires `make`
