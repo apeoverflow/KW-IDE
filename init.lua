@@ -70,6 +70,12 @@ vim.g.loaded_netrwPlugin = 1
 -- Add homebrew to PATH
 vim.env.PATH = vim.env.PATH .. ':/opt/homebrew/bin'
 
+-- Add FVM to PATH if it exists
+local fvm_path = vim.fn.expand('~/.fvm_flutter/bin')
+if vim.fn.isdirectory(fvm_path) == 1 then
+  vim.env.PATH = vim.env.PATH .. ':' .. fvm_path
+end
+
 -- Split buffer functions
 function Split_current_buffer_horizontally()
   local current_buf = vim.api.nvim_get_current_buf()
@@ -127,6 +133,9 @@ map('n', '<leader>li', function()
   if #clients > 0 then
     for _, client in ipairs(clients) do
       print('Active LSP: ' .. client.name)
+      if client.name == 'dartls' then
+        print('Dart LSP cmd:', vim.inspect(client.config.cmd))
+      end
     end
   else
     print('No active LSP clients')
@@ -139,6 +148,31 @@ map('n', '<leader>li', function()
     print('clangd found in PATH')
   else
     print('clangd NOT found in PATH')
+  end
+
+  -- Check FVM and Dart availability
+  local fvm_check = vim.fn.system('fvm --version 2>/dev/null'):gsub('\n', '')
+  if fvm_check ~= '' then
+    print('FVM found: ' .. fvm_check)
+    local fvm_config = vim.fn.findfile('.fvmrc', '.;') or vim.fn.findfile('.fvm/fvm_config.json', '.;')
+    if fvm_config ~= '' then
+      print('FVM config found: ' .. fvm_config)
+      local fvm_flutter = vim.fn.system('fvm flutter --version 2>/dev/null | head -1'):gsub('\n', '')
+      if fvm_flutter ~= '' then
+        print('FVM Flutter: ' .. fvm_flutter)
+      end
+    else
+      print('No FVM config in current project')
+    end
+  else
+    print('FVM not found')
+  end
+
+  if vim.fn.executable('dart') == 1 then
+    local dart_version = vim.fn.system('dart --version 2>&1'):gsub('\n', '')
+    print('Dart found: ' .. dart_version)
+  else
+    print('Dart NOT found in PATH')
   end
 end, { desc = 'LSP Info' })
 
@@ -248,6 +282,29 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'dart' },
+  callback = function()
+    -- Helper function to get Dart command with FVM support
+    local function get_dart_cmd()
+      local fvm_check = vim.fn.system('fvm --version 2>/dev/null'):gsub('\n', '')
+      if fvm_check ~= '' then
+        local fvm_config = vim.fn.findfile('.fvmrc', '.;') or vim.fn.findfile('.fvm/fvm_config.json', '.;')
+        if fvm_config ~= '' then
+          return { 'fvm', 'dart', 'language-server', '--protocol=lsp' }
+        end
+      end
+      return { 'dart', 'language-server', '--protocol=lsp' }
+    end
+
+    vim.lsp.start({
+      name = 'dartls',
+      cmd = get_dart_cmd(),
+      root_dir = vim.fn.getcwd(),
+    })
+  end,
+})
+
 -- Add more keymaps after plugins load
 vim.defer_fn(function()
   -- NvimTree keymaps
@@ -302,5 +359,26 @@ vim.defer_fn(function()
       print('No word under cursor')
     end
   end, { desc = 'Search word under cursor in manual' })
+
+  -- Flutter/Dart specific keybindings
+  -- Quick pubspec.yaml access
+  map('n', '<leader>fp', function()
+    local pubspec = vim.fn.findfile('pubspec.yaml', '.;')
+    if pubspec ~= '' then
+      vim.cmd('edit ' .. pubspec)
+    else
+      print('pubspec.yaml not found')
+    end
+  end, { desc = 'Open pubspec.yaml' })
+
+  -- Quick main.dart access
+  map('n', '<leader>fm', function()
+    local main = vim.fn.findfile('lib/main.dart', '.;')
+    if main ~= '' then
+      vim.cmd('edit ' .. main)
+    else
+      print('lib/main.dart not found')
+    end
+  end, { desc = 'Open main.dart' })
 
 end, 100)

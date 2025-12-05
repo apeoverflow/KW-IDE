@@ -18,6 +18,7 @@ return {
         ensure_installed = {
           'lua', 'vim', 'vimdoc', 'javascript', 'typescript', 'tsx',
           'html', 'css', 'json', 'python', 'c', 'cpp', 'vue', 'markdown',
+          'dart', 'yaml',
         },
 
         sync_install = false,
