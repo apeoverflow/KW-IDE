@@ -128,58 +128,8 @@ return {
         on_attach = on_attach,
       }
 
-      -- Helper function to get Dart command with FVM support
-      local function get_dart_cmd()
-        local fvm_check = vim.fn.system('fvm --version 2>/dev/null'):gsub('\n', '')
-        if fvm_check ~= '' then
-          -- Check if we're in a Flutter project with FVM config
-          local fvm_config = vim.fn.findfile('.fvmrc', '.;') or vim.fn.findfile('.fvm/fvm_config.json', '.;')
-          if fvm_config ~= '' then
-            return { 'fvm', 'dart', 'language-server', '--protocol=lsp' }
-          end
-        end
-        return { 'dart', 'language-server', '--protocol=lsp' }
-      end
-
-      -- Configure Dart LSP
-      vim.lsp.config.dartls = {
-        cmd = get_dart_cmd(),
-        filetypes = { 'dart' },
-        root_markers = { 'pubspec.yaml', '.fvmrc', '.fvm/fvm_config.json', '.git' },
-        capabilities = capabilities,
-        on_attach = function(client, bufnr)
-          on_attach(client, bufnr)
-
-          -- Flutter-specific keymaps
-          local nmap = function(keys, func, desc)
-            if desc then
-              desc = 'Flutter: ' .. desc
-            end
-            vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
-          end
-
-          nmap('<leader>fr', '<cmd>FlutterRun<CR>', 'Run')
-          nmap('<leader>fq', '<cmd>FlutterQuit<CR>', 'Quit')
-          nmap('<leader>fh', '<cmd>FlutterReload<CR>', 'Hot Reload')
-          nmap('<leader>fR', '<cmd>FlutterRestart<CR>', 'Hot Restart')
-          nmap('<leader>fd', '<cmd>FlutterDevices<CR>', 'Devices')
-          nmap('<leader>fe', '<cmd>FlutterEmulators<CR>', 'Emulators')
-          nmap('<leader>fo', '<cmd>FlutterOutlineToggle<CR>', 'Toggle Outline')
-        end,
-        settings = {
-          dart = {
-            completeFunctionCalls = true,
-            showTodos = true,
-          }
-        },
-        init_options = {
-          onlyAnalyzeProjectsWithOpenFiles = true,
-          suggestFromUnimportedLibraries = true,
-          closingLabels = true,
-          outline = true,
-          flutterOutline = true,
-        },
-      }
+      -- NOTE: Dart LSP is handled by flutter-tools.nvim with fvm = true
+      -- Do not configure dartls here to avoid conflicts
 
       -- Auto-enable LSP servers when opening relevant files
       vim.api.nvim_create_autocmd('FileType', {
@@ -251,35 +201,7 @@ return {
         end,
       })
 
-      vim.api.nvim_create_autocmd('FileType', {
-        pattern = { 'dart' },
-        callback = function(args)
-          local root_dir = vim.fs.root(args.buf, { 'pubspec.yaml', '.fvmrc', '.fvm/fvm_config.json', '.git' })
-
-          -- Determine Dart command based on FVM availability
-          local dart_cmd = get_dart_cmd()
-
-          vim.lsp.start({
-            name = 'dartls',
-            cmd = dart_cmd,
-            root_dir = root_dir,
-            capabilities = capabilities,
-            settings = {
-              dart = {
-                completeFunctionCalls = true,
-                showTodos = true,
-              }
-            },
-            init_options = {
-              onlyAnalyzeProjectsWithOpenFiles = true,
-              suggestFromUnimportedLibraries = true,
-              closingLabels = true,
-              outline = true,
-              flutterOutline = true,
-            },
-          })
-        end,
-      })
+      -- NOTE: Dart FileType autocmd removed - flutter-tools.nvim handles Dart LSP
 
       -- Configure diagnostics with more explicit settings
       vim.diagnostic.config({
@@ -297,19 +219,17 @@ return {
           prefix = "",
         },
         signs = {
-          active = true,
+          text = {
+            [vim.diagnostic.severity.ERROR] = "󰅚 ",
+            [vim.diagnostic.severity.WARN] = "󰀪 ",
+            [vim.diagnostic.severity.HINT] = "󰌶 ",
+            [vim.diagnostic.severity.INFO] = " ",
+          },
         },
         underline = true,
         update_in_insert = false,
         severity_sort = true,
       })
-
-      -- Define diagnostic signs
-      local signs = { Error = "󰅚 ", Warn = "󰀪 ", Hint = "󰌶 ", Info = " " }
-      for type, icon in pairs(signs) do
-        local hl = "DiagnosticSign" .. type
-        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-      end
 
       -- Diagnostic keymaps
       vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
