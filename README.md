@@ -146,6 +146,10 @@ See the [Quick Reference Card](#quick-reference-card) below for more keybindings
 | `<Space>x` | Normal | **Split Buffer Horizontally** |
 | `<Space>v` | Normal | **Split Buffer Vertically** |
 | `gf` | Normal | Go to file/definition under cursor |
+| `<Space>cd` | Normal | **Copy working directory to clipboard** |
+| `<Space>mm` | Normal | **Mark current file and line** |
+| `<Space>mj` | Normal | **Jump to marked file and line** |
+| `<Space>mc` | Normal | **Mark position and copy nvim command** |
 
 ### LSP & Development
 | Key | Mode | Action |

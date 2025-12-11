@@ -123,6 +123,40 @@ map('i', '<A-3>', '#', { noremap = true, silent = true })
 -- Toggle search highlight
 map('n', '<leader>h', ':noh<CR>', { noremap = true, silent = true, desc = 'Clear search highlight' })
 
+-- Copy working directory to clipboard
+map('n', '<leader>cd', function()
+  local cwd = vim.fn.getcwd()
+  vim.fn.setreg('+', cwd)
+  print('Copied to clipboard: ' .. cwd)
+end, { noremap = true, silent = true, desc = 'Copy working directory to clipboard' })
+
+-- Mark current file and line position
+map('n', '<leader>mm', function()
+  vim.g.marked_file = vim.fn.expand('%:p')
+  vim.g.marked_line = vim.fn.line('.')
+  print('Marked: ' .. vim.g.marked_file .. ':' .. vim.g.marked_line)
+end, { noremap = true, silent = true, desc = 'Mark current file and line' })
+
+-- Jump to marked file and line position
+map('n', '<leader>mj', function()
+  if vim.g.marked_file and vim.g.marked_line then
+    vim.cmd('edit ' .. vim.g.marked_file)
+    vim.fn.cursor(vim.g.marked_line, 0)
+    print('Jumped to: ' .. vim.g.marked_file .. ':' .. vim.g.marked_line)
+  else
+    print('No mark set. Use <leader>mm to set a mark.')
+  end
+end, { noremap = true, silent = true, desc = 'Jump to marked file and line' })
+
+-- Mark current position and copy nvim command to clipboard
+map('n', '<leader>mc', function()
+  vim.g.marked_file = vim.fn.expand('%:p')
+  vim.g.marked_line = vim.fn.line('.')
+  local cmd = 'nvim +' .. vim.g.marked_line .. ' ' .. vim.g.marked_file
+  vim.fn.setreg('+', cmd)
+  print('Copied to clipboard: ' .. cmd)
+end, { noremap = true, silent = true, desc = 'Mark position and copy nvim command' })
+
 -- Tab navigation
 map('n', '<C-a>', ':tabprevious<CR>', { noremap = true, silent = true })
 
