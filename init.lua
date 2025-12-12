@@ -130,31 +130,58 @@ map('n', '<leader>cd', function()
   print('Copied to clipboard: ' .. cwd)
 end, { noremap = true, silent = true, desc = 'Copy working directory to clipboard' })
 
--- Mark current file and line position
+-- Persistent mark file location
+local mark_file = vim.fn.stdpath('data') .. '/persistent_mark.txt'
+
+local function save_mark(file, line)
+  local f = io.open(mark_file, 'w')
+  if f then
+    f:write(file .. '\n' .. line)
+    f:close()
+  end
+end
+
+local function load_mark()
+  local f = io.open(mark_file, 'r')
+  if f then
+    local file = f:read('*l')
+    local line = tonumber(f:read('*l'))
+    f:close()
+    if file and line then
+      return file, line
+    end
+  end
+  return nil, nil
+end
+
+-- Mark current file and line position (persists across all sessions)
 map('n', '<leader>mm', function()
-  vim.g.marked_file = vim.fn.expand('%:p')
-  vim.g.marked_line = vim.fn.line('.')
-  print('Marked: ' .. vim.g.marked_file .. ':' .. vim.g.marked_line)
-end, { noremap = true, silent = true, desc = 'Mark current file and line' })
+  local file = vim.fn.expand('%:p')
+  local line = vim.fn.line('.')
+  save_mark(file, line)
+  print('Marked: ' .. file .. ':' .. line)
+end, { noremap = true, silent = true, desc = 'Mark current file and line (persistent)' })
 
 -- Jump to marked file and line position
 map('n', '<leader>mj', function()
-  if vim.g.marked_file and vim.g.marked_line then
-    vim.cmd('edit ' .. vim.g.marked_file)
-    vim.fn.cursor(vim.g.marked_line, 0)
-    print('Jumped to: ' .. vim.g.marked_file .. ':' .. vim.g.marked_line)
+  local file, line = load_mark()
+  if file and line then
+    vim.cmd('edit ' .. vim.fn.fnameescape(file))
+    vim.fn.cursor(line, 0)
+    print('Jumped to: ' .. file .. ':' .. line)
   else
     print('No mark set. Use <leader>mm to set a mark.')
   end
-end, { noremap = true, silent = true, desc = 'Jump to marked file and line' })
+end, { noremap = true, silent = true, desc = 'Jump to marked file and line (persistent)' })
 
 -- Mark current position and copy nvim command to clipboard
 map('n', '<leader>mc', function()
-  vim.g.marked_file = vim.fn.expand('%:p')
-  vim.g.marked_line = vim.fn.line('.')
-  local cmd = 'nvim +' .. vim.g.marked_line .. ' ' .. vim.g.marked_file
+  local file = vim.fn.expand('%:p')
+  local line = vim.fn.line('.')
+  save_mark(file, line)
+  local cmd = 'nvim +' .. line .. ' ' .. file
   vim.fn.setreg('+', cmd)
-  print('Copied to clipboard: ' .. cmd)
+  print('Marked & copied: ' .. cmd)
 end, { noremap = true, silent = true, desc = 'Mark position and copy nvim command' })
 
 -- Tab navigation
