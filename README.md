@@ -193,6 +193,24 @@ See the [Quick Reference Card](#quick-reference-card) below for more keybindings
 - **Smart Commands** - Auto-detects FVM projects vs global Flutter
 - **Debugging Support** - DAP integration with breakpoints and variable inspection
 
+### Rust
+- **Full IDE Experience** - Complete Rust development environment
+- **rust-analyzer** - Advanced LSP with inlay hints, clippy integration
+- **Cargo integration** - Build, run, test, clippy, fmt commands
+- **Crates.nvim** - Manage dependencies in Cargo.toml
+- **DAP Debugging** - Full debugger with breakpoints and variable inspection
+- **Macro expansion** - View expanded macros inline
+- **Documentation** - Open docs.rs for any symbol
+
+### Go
+- **Full IDE Experience** - Complete Go development environment
+- **gopls integration** - Advanced LSP with inlay hints, staticcheck
+- **Go tools** - Build, run, test, vet, lint, generate
+- **go.nvim** - Enhanced Go development with code actions
+- **DAP Debugging** - Full debugger with delve integration
+- **Test generation** - Auto-generate test functions
+- **Struct tags** - Add/remove JSON, XML, and other struct tags
+
 ### General
 - **Syntax highlighting** via TreeSitter
 - **Auto-indentation** and formatting
@@ -542,6 +560,440 @@ ColumnLimit: 100
 
 ---
 
+## Rust Development Setup
+
+A complete IDE experience for Rust development with rust-analyzer, Cargo integration, debugging support, and crate management.
+
+### Prerequisites
+
+1. **Install Rust via rustup**:
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   source $HOME/.cargo/env
+   ```
+
+2. **Install rust-analyzer**:
+   ```bash
+   rustup component add rust-analyzer
+   ```
+
+3. **Install additional tools**:
+   ```bash
+   rustup component add clippy rustfmt
+   ```
+
+4. **Install CodeLLDB** (Debugger - via Mason):
+   ```vim
+   :Mason
+   " Search for 'codelldb' and install it
+   ```
+
+### Features
+
+#### Enhanced rust-analyzer Configuration
+The rust-analyzer LSP is configured with optimal settings:
+- **Clippy on save** - Run clippy automatically when saving
+- **All features enabled** - Cargo builds with all features
+- **Proc macro support** - Full procedural macro expansion
+- **Inlay hints** - Type hints, parameter hints, chaining hints
+- **Code lens** - References, implementations, run/debug buttons
+
+#### Cargo Commands
+| Command | Description |
+|---------|-------------|
+| `:CargoBuild` | Build the project |
+| `:CargoRun` | Run the project |
+| `:CargoTest` | Run tests |
+| `:CargoCheck` | Run cargo check |
+| `:CargoClippy` | Run clippy lints |
+| `:CargoFmt` | Format with rustfmt |
+| `:CargoDoc` | Generate documentation |
+| `:CargoDoc!` | Generate and open documentation |
+| `:CargoAdd <crate>` | Add a dependency |
+| `:CargoRemove <crate>` | Remove a dependency |
+| `:CargoUpdate` | Update dependencies |
+| `:CargoClean` | Clean build artifacts |
+| `:CargoBench` | Run benchmarks |
+| `:CargoNew <name>` | Create new project |
+| `:RustInfo` | Show Rust development info |
+
+#### Rust-Analyzer Commands (via rustaceanvim)
+| Key | Mode | Action |
+|-----|------|--------|
+| `<Leader>ra` | Normal | **Code actions** |
+| `<Leader>rr` | Normal | **Runnables** (select what to run) |
+| `<Leader>rd` | Normal | **Debuggables** (select what to debug) |
+| `<Leader>rt` | Normal | **Testables** (select test to run) |
+| `<Leader>rm` | Normal | **Expand macro** |
+| `<Leader>rc` | Normal | **Open Cargo.toml** |
+| `<Leader>rp` | Normal | **Go to parent module** |
+| `<Leader>rj` | Normal | **Join lines** |
+| `<Leader>rh` | Normal | **Hover actions** |
+| `<Leader>re` | Normal | **Explain error** |
+| `<Leader>rD` | Normal | **Render diagnostic** |
+| `<Leader>ro` | Normal | **Open docs.rs** |
+| `<Leader>ri` | Normal | **Rust info** |
+| `J` | Normal | **Join lines** (Rust-aware) |
+
+#### Cargo Key Bindings
+| Key | Mode | Action |
+|-----|------|--------|
+| `<Leader>Cb` | Normal | **Cargo build** |
+| `<Leader>Cr` | Normal | **Cargo run** |
+| `<Leader>Ct` | Normal | **Cargo test** |
+| `<Leader>Cc` | Normal | **Cargo check** |
+| `<Leader>Cl` | Normal | **Cargo clippy** |
+| `<Leader>Cf` | Normal | **Cargo fmt** |
+| `<Leader>Cd` | Normal | **Cargo doc (open)** |
+| `<Leader>Cu` | Normal | **Cargo update** |
+| `<Leader>Cn` | Normal | **Cargo clean** |
+
+#### Crates.nvim (Cargo.toml management)
+| Key | Mode | Action |
+|-----|------|--------|
+| `<Leader>ct` | Normal | **Toggle crate info** |
+| `<Leader>cr` | Normal | **Reload crates** |
+| `<Leader>cv` | Normal | **Show versions popup** |
+| `<Leader>cf` | Normal | **Show features popup** |
+| `<Leader>cd` | Normal | **Show dependencies popup** |
+| `<Leader>cu` | Normal | **Update crate** |
+| `<Leader>cu` | Visual | **Update selected crates** |
+| `<Leader>ca` | Normal | **Update all crates** |
+| `<Leader>cU` | Normal | **Upgrade crate** (major version) |
+| `<Leader>cA` | Normal | **Upgrade all crates** |
+| `<Leader>cH` | Normal | **Open homepage** |
+| `<Leader>cR` | Normal | **Open repository** |
+| `<Leader>cD` | Normal | **Open documentation** |
+| `<Leader>cC` | Normal | **Open crates.io** |
+
+#### Debugging Key Bindings
+| Key | Mode | Action |
+|-----|------|--------|
+| `<F5>` | Normal | **Start/Continue debugging** |
+| `<F9>` | Normal | **Toggle breakpoint** |
+| `<F10>` | Normal | **Terminate debugging** |
+| `<F1>` | Normal | **Step into** |
+| `<F2>` | Normal | **Step over** |
+| `<F3>` | Normal | **Step out** |
+| `<Leader>b` | Normal | **Toggle breakpoint** |
+| `<Leader>B` | Normal | **Conditional breakpoint** |
+
+### Quick Start
+
+1. **Create a new Rust project**:
+   ```bash
+   cargo new myproject
+   cd myproject
+   ```
+
+2. **Open in Neovim**:
+   ```bash
+   nvim src/main.rs
+   ```
+
+3. **Build and run**:
+   - Press `<Leader>Cb` to build
+   - Press `<Leader>Cr` to run
+   - Or use `<Leader>rr` to see all runnables
+
+4. **Run tests**:
+   - Press `<Leader>Ct` to run all tests
+   - Or use `<Leader>rt` to select specific tests
+
+5. **Debug**:
+   - Build with debug info: `cargo build`
+   - Press `<Leader>b` to set a breakpoint
+   - Press `<Leader>rd` to select debuggable, or `<F5>` to start
+
+### Project Setup Tips
+
+#### Cargo.toml Features
+In Cargo.toml, crates.nvim shows inline version info and allows easy updates:
+- Hover over a crate to see available versions
+- Use `<Leader>cv` to see all versions
+- Use `<Leader>cu` to update to latest compatible version
+
+#### rust-analyzer Configuration
+Create `.cargo/config.toml` for project-specific settings:
+```toml
+[build]
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+
+[target.x86_64-unknown-linux-gnu]
+linker = "clang"
+```
+
+#### clippy.toml
+Create `clippy.toml` for clippy configuration:
+```toml
+cognitive-complexity-threshold = 30
+```
+
+### Troubleshooting
+
+**rust-analyzer not starting:**
+- Run `:RustInfo` to check tool availability
+- Ensure rust-analyzer is installed: `rustup component add rust-analyzer`
+- Check `:LspInfo` for LSP status
+
+**No completions or diagnostics:**
+- Ensure you're in a Cargo project (Cargo.toml exists)
+- Run `:RustAnalyzer restart` to restart the LSP
+- Check for errors: `:RustAnalyzer logs`
+
+**Debugger not working:**
+- Install CodeLLDB via `:Mason`
+- Build with debug symbols: `cargo build` (debug is default)
+- Ensure target/debug/<binary> exists
+
+**Inlay hints not showing:**
+- Check if enabled: `:lua print(vim.lsp.inlay_hint.is_enabled())`
+- Toggle with `:lua vim.lsp.inlay_hint.enable(true)`
+
+---
+
+## Go Development Setup
+
+A complete IDE experience for Go development with gopls, delve debugging, testing support, and powerful code generation tools.
+
+### Prerequisites
+
+1. **Install Go**:
+   ```bash
+   # macOS
+   brew install go
+
+   # Or download from https://golang.org/dl/
+   ```
+
+2. **Install Go tools** (auto-installed by go.nvim, or manually):
+   ```bash
+   # LSP
+   go install golang.org/x/tools/gopls@latest
+
+   # Formatter
+   go install mvdan.cc/gofumpt@latest
+
+   # Imports
+   go install golang.org/x/tools/cmd/goimports@latest
+
+   # Debugger
+   go install github.com/go-delve/delve/cmd/dlv@latest
+
+   # Linter
+   brew install golangci-lint
+
+   # Test generation
+   go install github.com/cweill/gotests/gotests@latest
+
+   # Struct tags
+   go install github.com/fatih/gomodifytags@latest
+
+   # Interface implementation
+   go install github.com/josharian/impl@latest
+   ```
+
+### Features
+
+#### Enhanced gopls Configuration
+The gopls LSP is configured with optimal settings:
+- **Staticcheck** - Advanced static analysis
+- **Gofumpt** - Stricter formatting than gofmt
+- **Inlay hints** - Type hints, parameter hints
+- **Code lens** - Run tests, generate code
+- **All analyses enabled** - nilness, shadow, unusedparams
+
+#### Go Commands
+| Command | Description |
+|---------|-------------|
+| `:GoBuild` | Build the project |
+| `:GoRun` | Run the project |
+| `:GoTest` | Run all tests |
+| `:GoTestFunc` | Run current test function |
+| `:GoTestFile` | Run tests in current file |
+| `:GoCoverage` | Run tests with coverage |
+| `:GoVet` | Run go vet |
+| `:GoFmt` | Format with go fmt |
+| `:GoImports` | Organize imports |
+| `:GoLint` | Run golangci-lint |
+| `:GoGenerate` | Run go generate |
+| `:GoModTidy` | Run go mod tidy |
+| `:GoModInit` | Initialize go module |
+| `:GoGet <pkg>` | Get a package |
+| `:GoInstall` | Install the project |
+| `:GoClean` | Clean build cache |
+| `:GoDoc` | Show documentation |
+| `:GoInfo` | Show Go development info |
+| `:GoAlt` | Switch between test/impl file |
+| `:GoIfErr` | Insert if err != nil block |
+| `:GoFillStruct` | Fill struct fields |
+
+#### Go Key Bindings (via go.nvim)
+| Key | Mode | Action |
+|-----|------|--------|
+| `<Leader>gi` | Normal | **Go imports** |
+| `<Leader>gf` | Normal | **Go format** |
+| `<Leader>gt` | Normal | **Go test** |
+| `<Leader>gT` | Normal | **Go test function** |
+| `<Leader>gtt` | Normal | **Go test file** |
+| `<Leader>gtc` | Normal | **Go coverage** |
+| `<Leader>gr` | Normal | **Go run** |
+| `<Leader>gb` | Normal | **Go build** |
+| `<Leader>gB` | Normal | **Go generate** |
+| `<Leader>gl` | Normal | **Go lint** |
+| `<Leader>gv` | Normal | **Go vet** |
+| `<Leader>ge` | Normal | **Insert if err** |
+| `<Leader>gfs` | Normal | **Fill struct** |
+| `<Leader>gfw` | Normal | **Fill switch** |
+| `<Leader>ga` | Normal | **Add struct tag** |
+| `<Leader>gA` | Normal | **Remove struct tag** |
+| `<Leader>gc` | Normal | **Add comment** |
+| `<Leader>gd` | Normal | **Go doc** |
+| `<Leader>gD` | Normal | **Go debug** |
+| `<Leader>gI` | Normal | **Implement interface** |
+| `<Leader>gm` | Normal | **Go mod tidy** |
+| `<Leader>gM` | Normal | **Go mod init** |
+| `<Leader>gp` | Normal | **Go test package** |
+| `<Leader>gat` | Normal | **Add test** |
+| `<Leader>gae` | Normal | **Add example test** |
+| `<Leader>gaa` | Normal | **Add all tests** |
+| `<Leader>gx` | Normal | **Switch to alt file** |
+| `<Leader>gX` | Normal | **Switch to alt (vsplit)** |
+
+#### Quick Go Commands
+| Key | Mode | Action |
+|-----|------|--------|
+| `<Leader>Gb` | Normal | **Go build** |
+| `<Leader>Gr` | Normal | **Go run** |
+| `<Leader>Gt` | Normal | **Go test** |
+| `<Leader>Gv` | Normal | **Go vet** |
+| `<Leader>Gl` | Normal | **Go lint** |
+| `<Leader>Gf` | Normal | **Go fmt** |
+| `<Leader>Gi` | Normal | **Go info** |
+| `<Leader>Gm` | Normal | **Go mod tidy** |
+
+#### Debugging Key Bindings
+| Key | Mode | Action |
+|-----|------|--------|
+| `<Leader>gds` | Normal | **Start debugging** |
+| `<Leader>gdt` | Normal | **Debug test** |
+| `<Leader>gdb` | Normal | **Toggle breakpoint** |
+| `<Leader>gdc` | Normal | **Conditional breakpoint** |
+| `<Leader>gdq` | Normal | **Stop debugging** |
+| `<F5>` | Normal | **Continue** |
+| `<F1>` | Normal | **Step into** |
+| `<F2>` | Normal | **Step over** |
+| `<F3>` | Normal | **Step out** |
+
+### Quick Start
+
+1. **Create a new Go project**:
+   ```bash
+   mkdir myproject && cd myproject
+   go mod init example.com/myproject
+   ```
+
+2. **Create main.go**:
+   ```go
+   package main
+
+   import "fmt"
+
+   func main() {
+       fmt.Println("Hello, Go!")
+   }
+   ```
+
+3. **Open in Neovim**:
+   ```bash
+   nvim main.go
+   ```
+
+4. **Build and run**:
+   - Press `<Leader>gb` to build
+   - Press `<Leader>gr` to run
+   - Or `<Leader>Gb` / `<Leader>Gr` for quick commands
+
+5. **Run tests**:
+   - Press `<Leader>gt` to run all tests
+   - Press `<Leader>gT` to run current test function
+
+6. **Debug**:
+   - Press `<Leader>b` to set a breakpoint
+   - Press `<Leader>gds` to start debugging
+
+### Project Setup Tips
+
+#### Struct Tags
+Add JSON tags to struct fields:
+```go
+type User struct {
+    Name string  // cursor here, press <Leader>ga
+    Age  int
+}
+```
+After pressing `<Leader>ga`:
+```go
+type User struct {
+    Name string `json:"name"`
+    Age  int    `json:"age"`
+}
+```
+
+#### Interface Implementation
+Generate interface implementation:
+1. Place cursor on type name
+2. Run `:GoImpl io.Reader` or press `<Leader>gI`
+
+#### Test Generation
+Generate test for current function:
+1. Place cursor on function
+2. Press `<Leader>gat` to add test
+3. Press `<Leader>gaa` to add tests for all functions
+
+#### golangci-lint Configuration
+Create `.golangci.yml` in project root:
+```yaml
+linters:
+  enable:
+    - gofmt
+    - golint
+    - govet
+    - errcheck
+    - staticcheck
+    - gosimple
+    - ineffassign
+    - unused
+
+linters-settings:
+  govet:
+    check-shadowing: true
+```
+
+### Troubleshooting
+
+**gopls not starting:**
+- Run `:GoInfo` to check tool availability
+- Install gopls: `go install golang.org/x/tools/gopls@latest`
+- Check `:LspInfo` for LSP status
+
+**No completions or diagnostics:**
+- Ensure you're in a Go module (go.mod exists)
+- Run `:GoModTidy` to fix module issues
+- Check GOPATH and GOROOT are set correctly
+
+**Debugger not working:**
+- Install delve: `go install github.com/go-delve/delve/cmd/dlv@latest`
+- Ensure `dlv` is in PATH
+- Build with: `go build -gcflags="all=-N -l"` for debugging
+
+**Format on save not working:**
+- Check if gofumpt is installed
+- Try `:GoFmt` manually
+- Check `:messages` for errors
+
+---
+
 ## Detailed Feature Guide
 
 ### File Explorer (`Ctrl+B`)
@@ -619,6 +1071,8 @@ Intelligently handles different file types:
 │       ├── completion.lua  # nvim-cmp autocompletion
 │       ├── copilot.lua     # GitHub Copilot
 │       ├── cpp.lua         # C/C++ IDE (clangd, CMake, debugging)
+│       ├── rust.lua        # Rust IDE (rust-analyzer, Cargo, crates.nvim)
+│       ├── go.lua          # Go IDE (gopls, delve, go.nvim)
 │       ├── git.lua         # LazyGit integration (floating window)
 │       ├── lsp.lua         # Language servers (modern vim.lsp.config)
 │       ├── nvim-tree.lua   # File explorer
@@ -712,6 +1166,13 @@ Each plugin has its own configuration file for maintainability:
 - For debugging, install CodeLLDB via `:Mason`
 - Check LSP status with `<Leader>li` or `:LspInfo`
 
+**Rust Issues**
+- Run `:RustInfo` to check all Rust tool availability
+- Ensure rust-analyzer is installed: `rustup component add rust-analyzer`
+- For debugging, install CodeLLDB via `:Mason`
+- Check LSP status with `:LspInfo`
+- Restart rust-analyzer with `:RustAnalyzer restart`
+
 ---
 
 ## Customization
@@ -759,6 +1220,21 @@ Create new files in `lua/plugins/` or modify existing ones. The setup automatica
 - **Ninja** (optional, faster builds)
 - **CodeLLDB** (install via `:Mason` for debugging)
 - **bear** (optional, for generating compile_commands.json from Makefiles)
+
+### Rust Development Requirements
+- **rustup** (Rust toolchain manager)
+- **rust-analyzer** (`rustup component add rust-analyzer`)
+- **clippy** (`rustup component add clippy`)
+- **rustfmt** (`rustup component add rustfmt`)
+- **CodeLLDB** (install via `:Mason` for debugging)
+
+### Go Development Requirements
+- **Go** (install via brew or golang.org)
+- **gopls** (`go install golang.org/x/tools/gopls@latest`)
+- **delve** (`go install github.com/go-delve/delve/cmd/dlv@latest`)
+- **gofumpt** (`go install mvdan.cc/gofumpt@latest`)
+- **golangci-lint** (install via brew)
+- Tools auto-installed by go.nvim on first use
 
 ### External Dependencies
 - **telescope-fzf-native** requires `make`

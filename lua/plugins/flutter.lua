@@ -311,6 +311,114 @@ return {
       -- Use same configs for C
       dap.configurations.c = dap.configurations.cpp
 
+      -- Rust debug configurations (uses same codelldb adapter)
+      dap.configurations.rust = {
+        {
+          name = "Launch",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            -- Try to find the binary in target/debug
+            local cwd = vim.fn.getcwd()
+            local cargo_toml = cwd .. "/Cargo.toml"
+            if vim.fn.filereadable(cargo_toml) == 1 then
+              -- Get package name from Cargo.toml
+              local name = vim.fn.system("grep '^name' " .. cargo_toml .. " | head -1 | sed 's/.*\"\\(.*\\)\".*/\\1/'"):gsub("\n", "")
+              local binary = cwd .. "/target/debug/" .. name
+              if vim.fn.filereadable(binary) == 1 then
+                return binary
+              end
+            end
+            return vim.fn.input("Path to executable: ", cwd .. "/target/debug/", "file")
+          end,
+          cwd = "${workspaceFolder}",
+          stopOnEntry = false,
+          args = {},
+          runInTerminal = false,
+        },
+        {
+          name = "Launch with arguments",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            local cwd = vim.fn.getcwd()
+            return vim.fn.input("Path to executable: ", cwd .. "/target/debug/", "file")
+          end,
+          cwd = "${workspaceFolder}",
+          stopOnEntry = false,
+          args = function()
+            local args_string = vim.fn.input("Arguments: ")
+            return vim.split(args_string, " ")
+          end,
+          runInTerminal = false,
+        },
+        {
+          name = "Attach to process",
+          type = "codelldb",
+          request = "attach",
+          pid = require("dap.utils").pick_process,
+          cwd = "${workspaceFolder}",
+        },
+      }
+
+      -- Go debug configurations (uses delve)
+      dap.adapters.delve = {
+        type = "server",
+        port = "${port}",
+        executable = {
+          command = "dlv",
+          args = { "dap", "-l", "127.0.0.1:${port}" },
+        },
+      }
+
+      dap.configurations.go = {
+        {
+          type = "delve",
+          name = "Debug",
+          request = "launch",
+          program = "${file}",
+        },
+        {
+          type = "delve",
+          name = "Debug Package",
+          request = "launch",
+          program = "${fileDirname}",
+        },
+        {
+          type = "delve",
+          name = "Debug test",
+          request = "launch",
+          mode = "test",
+          program = "${file}",
+        },
+        {
+          type = "delve",
+          name = "Debug test (go.mod)",
+          request = "launch",
+          mode = "test",
+          program = "./${relativeFileDirname}",
+        },
+        {
+          type = "delve",
+          name = "Attach",
+          request = "attach",
+          mode = "local",
+          processId = require("dap.utils").pick_process,
+        },
+        {
+          type = "delve",
+          name = "Attach remote",
+          request = "attach",
+          mode = "remote",
+          host = function()
+            return vim.fn.input("Host [127.0.0.1]: ", "127.0.0.1")
+          end,
+          port = function()
+            return tonumber(vim.fn.input("Port [38697]: ", "38697"))
+          end,
+        },
+      }
+
       -- Debugging keymaps
       vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
       vim.keymap.set('n', '<F1>', dap.step_into, { desc = 'Debug: Step Into' })
