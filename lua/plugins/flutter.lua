@@ -158,7 +158,7 @@ return {
   },
 
   {
-    -- Enhanced debugging support for Flutter/Dart
+    -- Enhanced debugging support for Flutter/Dart and C/C++
     'mfussenegger/nvim-dap',
     dependencies = {
       'rcarriga/nvim-dap-ui',
@@ -169,7 +169,66 @@ return {
       local dap = require('dap')
       local dapui = require('dapui')
 
-      dapui.setup()
+      dapui.setup({
+        icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
+        mappings = {
+          expand = { "<CR>", "<2-LeftMouse>" },
+          open = "o",
+          remove = "d",
+          edit = "e",
+          repl = "r",
+          toggle = "t",
+        },
+        element_mappings = {},
+        expand_lines = vim.fn.has("nvim-0.7") == 1,
+        layouts = {
+          {
+            elements = {
+              { id = "scopes", size = 0.25 },
+              { id = "breakpoints", size = 0.25 },
+              { id = "stacks", size = 0.25 },
+              { id = "watches", size = 0.25 },
+            },
+            size = 40,
+            position = "left",
+          },
+          {
+            elements = {
+              { id = "repl", size = 0.5 },
+              { id = "console", size = 0.5 },
+            },
+            size = 0.25,
+            position = "bottom",
+          },
+        },
+        controls = {
+          enabled = true,
+          element = "repl",
+          icons = {
+            pause = "",
+            play = "",
+            step_into = "",
+            step_over = "",
+            step_out = "",
+            step_back = "",
+            run_last = "↻",
+            terminate = "□",
+          },
+        },
+        floating = {
+          max_height = nil,
+          max_width = nil,
+          border = "rounded",
+          mappings = {
+            close = { "q", "<Esc>" },
+          },
+        },
+        windows = { indent = 1 },
+        render = {
+          max_type_length = nil,
+          max_value_lines = 100,
+        },
+      })
 
       -- Auto open/close DAP UI
       dap.listeners.after.event_initialized["dapui_config"] = function()
@@ -182,18 +241,129 @@ return {
         dapui.close()
       end
 
+      -- C/C++ debugging with codelldb (LLDB adapter)
+      local codelldb_path = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb"
+      local liblldb_path = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/lldb/lib/liblldb.dylib"
+
+      -- Check if codelldb is installed via Mason
+      if vim.fn.filereadable(codelldb_path) == 1 then
+        dap.adapters.codelldb = {
+          type = "server",
+          port = "${port}",
+          executable = {
+            command = codelldb_path,
+            args = { "--port", "${port}" },
+          },
+        }
+      else
+        -- Fallback to lldb-vscode if available
+        if vim.fn.executable("lldb-vscode") == 1 then
+          dap.adapters.codelldb = {
+            type = "executable",
+            command = "lldb-vscode",
+            name = "lldb",
+          }
+        elseif vim.fn.executable("lldb-dap") == 1 then
+          dap.adapters.codelldb = {
+            type = "executable",
+            command = "lldb-dap",
+            name = "lldb",
+          }
+        end
+      end
+
+      -- C/C++ debug configurations
+      dap.configurations.cpp = {
+        {
+          name = "Launch file",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+          end,
+          cwd = "${workspaceFolder}",
+          stopOnEntry = false,
+          args = {},
+        },
+        {
+          name = "Launch with arguments",
+          type = "codelldb",
+          request = "launch",
+          program = function()
+            return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+          end,
+          cwd = "${workspaceFolder}",
+          stopOnEntry = false,
+          args = function()
+            local args_string = vim.fn.input("Arguments: ")
+            return vim.split(args_string, " ")
+          end,
+        },
+        {
+          name = "Attach to process",
+          type = "codelldb",
+          request = "attach",
+          pid = require("dap.utils").pick_process,
+          cwd = "${workspaceFolder}",
+        },
+      }
+
+      -- Use same configs for C
+      dap.configurations.c = dap.configurations.cpp
+
       -- Debugging keymaps
       vim.keymap.set('n', '<F5>', dap.continue, { desc = 'Debug: Start/Continue' })
       vim.keymap.set('n', '<F1>', dap.step_into, { desc = 'Debug: Step Into' })
       vim.keymap.set('n', '<F2>', dap.step_over, { desc = 'Debug: Step Over' })
       vim.keymap.set('n', '<F3>', dap.step_out, { desc = 'Debug: Step Out' })
+      vim.keymap.set('n', '<F4>', dap.run_to_cursor, { desc = 'Debug: Run to Cursor' })
+      vim.keymap.set('n', '<F6>', dap.pause, { desc = 'Debug: Pause' })
+      vim.keymap.set('n', '<F9>', dap.toggle_breakpoint, { desc = 'Debug: Toggle Breakpoint' })
+      vim.keymap.set('n', '<F10>', dap.terminate, { desc = 'Debug: Terminate' })
       vim.keymap.set('n', '<leader>b', dap.toggle_breakpoint, { desc = 'Debug: Toggle Breakpoint' })
       vim.keymap.set('n', '<leader>B', function()
         dap.set_breakpoint(vim.fn.input('Breakpoint condition: '))
       end, { desc = 'Debug: Set Conditional Breakpoint' })
+      vim.keymap.set('n', '<leader>lp', function()
+        dap.set_breakpoint(nil, nil, vim.fn.input('Log point message: '))
+      end, { desc = 'Debug: Set Log Point' })
+      vim.keymap.set('n', '<leader>dr', dap.repl.open, { desc = 'Debug: Open REPL' })
+      vim.keymap.set('n', '<leader>dl', dap.run_last, { desc = 'Debug: Run Last' })
+      vim.keymap.set('n', '<leader>du', dapui.toggle, { desc = 'Debug: Toggle UI' })
+      vim.keymap.set('n', '<leader>de', dapui.eval, { desc = 'Debug: Evaluate' })
+      vim.keymap.set('v', '<leader>de', dapui.eval, { desc = 'Debug: Evaluate Selection' })
 
       -- Configure virtual text
-      require('nvim-dap-virtual-text').setup()
+      require('nvim-dap-virtual-text').setup({
+        enabled = true,
+        enabled_commands = true,
+        highlight_changed_variables = true,
+        highlight_new_as_changed = false,
+        show_stop_reason = true,
+        commented = false,
+        only_first_definition = true,
+        all_references = false,
+        filter_references_pattern = '<module',
+        virt_text_pos = 'eol',
+        all_frames = false,
+        virt_lines = false,
+        virt_text_win_col = nil,
+      })
+
+      -- Breakpoint signs
+      vim.fn.sign_define('DapBreakpoint', { text = '●', texthl = 'DapBreakpoint', linehl = '', numhl = '' })
+      vim.fn.sign_define('DapBreakpointCondition', { text = '◆', texthl = 'DapBreakpointCondition', linehl = '', numhl = '' })
+      vim.fn.sign_define('DapLogPoint', { text = '◇', texthl = 'DapLogPoint', linehl = '', numhl = '' })
+      vim.fn.sign_define('DapStopped', { text = '▶', texthl = 'DapStopped', linehl = 'DapStoppedLine', numhl = '' })
+      vim.fn.sign_define('DapBreakpointRejected', { text = '○', texthl = 'DapBreakpointRejected', linehl = '', numhl = '' })
+
+      -- Highlight groups for DAP signs
+      vim.api.nvim_set_hl(0, 'DapBreakpoint', { fg = '#e51400' })
+      vim.api.nvim_set_hl(0, 'DapBreakpointCondition', { fg = '#f0a30a' })
+      vim.api.nvim_set_hl(0, 'DapLogPoint', { fg = '#61afef' })
+      vim.api.nvim_set_hl(0, 'DapStopped', { fg = '#98c379' })
+      vim.api.nvim_set_hl(0, 'DapStoppedLine', { bg = '#2e4d3d' })
+      vim.api.nvim_set_hl(0, 'DapBreakpointRejected', { fg = '#5c6370' })
     end
   },
 
