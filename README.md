@@ -121,10 +121,15 @@ See the [Quick Reference Card](#quick-reference-card) below for more keybindings
 | `Ctrl+S` | Normal/Insert | Save file |
 | `Ctrl+N` | Normal | Open terminal (horizontal split) |
 | `Ctrl+X` | Terminal | Exit terminal to normal mode |
+| `Ctrl+C` | Terminal | Close terminal |
 | `Ctrl+B` | Normal | Toggle file explorer |
 | `Space+Ctrl+B` | Normal | Find current file in explorer |
 | `gf` | Normal | Go to file under cursor |
+| `Y` | Normal | Yank to end of line |
 | `Y` | Visual | Copy selection to clipboard |
+| `<Space>h` | Normal | Clear search highlight |
+| `<C-a>` | Normal | Previous tab |
+| `<A-3>` | Insert | Insert `#` character (macOS) |
 
 ### Navigation
 | Key | Mode | Action |
@@ -176,6 +181,7 @@ See the [Quick Reference Card](#quick-reference-card) below for more keybindings
 - **System headers** - `gf` on `<stdio.h>` works
 - **Clang-tidy** integration for code quality
 - **Background indexing** for large projects
+- **Man page lookup** - `<Leader>cm` opens man page for word under cursor
 
 ### Dart/Flutter (FVM Support)
 - **FVM Integration** - Automatic detection and usage of FVM Flutter versions
@@ -189,6 +195,35 @@ See the [Quick Reference Card](#quick-reference-card) below for more keybindings
 - **Auto-indentation** and formatting
 - **Git integration** with LazyGit
 - **GitHub Copilot** suggestions
+
+### GitHub Copilot
+AI-powered code suggestions with manual trigger mode for non-intrusive assistance.
+
+#### Inline Suggestions (Insert Mode)
+| Key | Action |
+|-----|--------|
+| `<M-l>` (Alt+L) | Accept suggestion |
+| `<M-]>` (Alt+]) | Next suggestion |
+| `<M-[>` (Alt+[) | Previous suggestion |
+| `<C-]>` (Ctrl+]) | Dismiss suggestion |
+
+#### Copilot Panel
+| Key | Mode | Action |
+|-----|------|--------|
+| `<C-g>` | Insert | Open panel |
+| `<M-CR>` (Alt+Enter) | Insert | Toggle panel |
+| `[[` | Panel | Previous suggestion |
+| `]]` | Panel | Next suggestion |
+| `<CR>` | Panel | Accept suggestion |
+| `gr` | Panel | Refresh suggestions |
+
+#### Commands
+- `:Copilot` - Check status/enable
+- `:Copilot status` - Authentication status
+- `:Copilot auth` - Authenticate with GitHub
+
+#### Disabled Filetypes
+Copilot is disabled for: yaml, markdown, help, gitcommit, gitrebase
 
 ---
 
