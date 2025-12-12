@@ -177,10 +177,13 @@ See the [Quick Reference Card](#quick-reference-card) below for more keybindings
 - **Error highlighting** and diagnostics
 
 ### C/C++
-- **Clangd integration** - Auto-starts for `.c/.cpp` files
-- **System headers** - `gf` on `<stdio.h>` works
-- **Clang-tidy** integration for code quality
-- **Background indexing** for large projects
+- **Full IDE Experience** - Complete C/C++ development environment
+- **Clangd integration** - Auto-starts with enhanced configuration
+- **CMake integration** - Build, run, and debug CMake projects
+- **Clangd Extensions** - Inlay hints, AST viewer, type hierarchy
+- **DAP Debugging** - Full debugger with breakpoints and variable inspection
+- **Header/Source switching** - Quick navigation between `.h` and `.cpp` files
+- **Auto-formatting** - Format on save with clang-format
 - **Man page lookup** - `<Leader>cm` opens man page for word under cursor
 
 ### Dart/Flutter (FVM Support)
@@ -314,6 +317,231 @@ The configuration automatically detects and uses FVM when available:
 
 ---
 
+## C/C++ Development Setup
+
+A complete IDE experience for C and C++ development with clangd, CMake integration, debugging support, and powerful code navigation.
+
+### Prerequisites
+
+1. **Install clangd** (Language Server):
+   ```bash
+   # macOS (included with Xcode Command Line Tools)
+   xcode-select --install
+
+   # Or install LLVM for latest clangd
+   brew install llvm
+   ```
+
+2. **Install CMake** (Build System):
+   ```bash
+   brew install cmake ninja
+   ```
+
+3. **Install CodeLLDB** (Debugger - via Mason):
+   ```vim
+   :Mason
+   " Search for 'codelldb' and install it
+   ```
+
+### Features
+
+#### Enhanced Clangd Configuration
+The clangd LSP is configured with optimal settings:
+- **Background indexing** - Index your project for fast navigation
+- **Clang-tidy** - Integrated static analysis and linting
+- **Header insertion** - Auto-add includes when needed (IWYU style)
+- **Detailed completions** - Rich completion with function signatures
+- **Inlay hints** - Parameter and type hints inline
+- **4 parallel jobs** - Fast indexing on multi-core systems
+
+#### Build System Auto-Detection
+The configuration automatically detects your build system:
+- **CMake** - `CMakeLists.txt`
+- **Make** - `Makefile` or `makefile`
+- **Meson** - `meson.build`
+- **Bazel** - `BUILD` or `BUILD.bazel`
+
+#### C/C++ Commands
+| Command | Description |
+|---------|-------------|
+| `:CppBuild` | Build project (auto-detects build system) |
+| `:CppRun` | Run project executable |
+| `:CppClean` | Clean build artifacts |
+| `:CppGenerateCompileCommands` | Generate `compile_commands.json` |
+| `:CppInfo` | Show C/C++ development info and tool status |
+| `:CppSwitchHeaderSource` | Switch between header and source file |
+| `:CppNewClass ClassName` | Create new C++ class (header + source) |
+| `:CppShowAST` | Show AST for current file |
+| `:CppTypeHierarchy` | Show type hierarchy |
+| `:CppSymbolInfo` | Show symbol information |
+| `:CppMemoryUsage` | Show clangd memory usage |
+
+#### CMake Commands (in CMake projects)
+| Command | Description |
+|---------|-------------|
+| `:CMakeGenerate` | Configure CMake project |
+| `:CMakeBuild` | Build with CMake |
+| `:CMakeRun` | Run CMake target |
+| `:CMakeDebug` | Debug CMake target |
+| `:CMakeSelectBuildType` | Select Debug/Release/etc. |
+| `:CMakeSelectLaunchTarget` | Select executable target |
+
+#### Key Bindings (C/C++ files only)
+| Key | Mode | Action |
+|-----|------|--------|
+| `<Leader>cb` | Normal | **Build project** |
+| `<Leader>cr` | Normal | **Run project** |
+| `<Leader>cc` | Normal | **Clean build** |
+| `<Leader>cg` | Normal | **Generate compile_commands.json** |
+| `<Leader>ch` | Normal | **Switch header/source** |
+| `<A-o>` | Normal | **Switch header/source** (Alt+O) |
+| `<Leader>ct` | Normal | **Show type hierarchy** |
+| `<Leader>cs` | Normal | **Show symbol info** |
+| `<Leader>ci` | Normal | **C++ dev info** |
+| `<Leader>cf` | Normal | **Compile current file only** |
+| `<Leader>cx` | Normal | **Run compiled file** |
+
+#### CMake Key Bindings (in CMake projects)
+| Key | Mode | Action |
+|-----|------|--------|
+| `<Leader>cmc` | Normal | **CMake configure** |
+| `<Leader>cmb` | Normal | **CMake build** |
+| `<Leader>cmr` | Normal | **CMake run** |
+| `<Leader>cmd` | Normal | **CMake debug** |
+| `<Leader>cms` | Normal | **Select build type** |
+| `<Leader>cmt` | Normal | **Select target** |
+
+#### Debugging Key Bindings
+| Key | Mode | Action |
+|-----|------|--------|
+| `<F5>` | Normal | **Start/Continue debugging** |
+| `<F9>` | Normal | **Toggle breakpoint** |
+| `<F10>` | Normal | **Terminate debugging** |
+| `<F1>` | Normal | **Step into** |
+| `<F2>` | Normal | **Step over** |
+| `<F3>` | Normal | **Step out** |
+| `<F4>` | Normal | **Run to cursor** |
+| `<F6>` | Normal | **Pause** |
+| `<Leader>b` | Normal | **Toggle breakpoint** |
+| `<Leader>B` | Normal | **Conditional breakpoint** |
+| `<Leader>lp` | Normal | **Log point** |
+| `<Leader>dr` | Normal | **Open debug REPL** |
+| `<Leader>dl` | Normal | **Run last debug config** |
+| `<Leader>du` | Normal | **Toggle debug UI** |
+| `<Leader>de` | Normal/Visual | **Evaluate expression** |
+
+### Quick Start
+
+1. **Create a CMake project**:
+   ```bash
+   mkdir myproject && cd myproject
+   ```
+
+2. **Create CMakeLists.txt**:
+   ```cmake
+   cmake_minimum_required(VERSION 3.16)
+   project(myproject LANGUAGES CXX)
+   set(CMAKE_CXX_STANDARD 17)
+   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+   add_executable(myproject main.cpp)
+   ```
+
+3. **Create main.cpp**:
+   ```cpp
+   #include <iostream>
+   int main() {
+       std::cout << "Hello, World!" << std::endl;
+       return 0;
+   }
+   ```
+
+4. **Open in Neovim**:
+   ```bash
+   nvim main.cpp
+   ```
+
+5. **Build and run**:
+   - Press `<Leader>cb` to build
+   - Press `<Leader>cr` to run
+
+6. **Debug**:
+   - Press `<Leader>b` to set a breakpoint
+   - Press `<F5>` to start debugging
+
+### Project Setup Tips
+
+#### compile_commands.json
+For best LSP experience, ensure `compile_commands.json` exists:
+
+**CMake projects:**
+```bash
+cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+# Or use :CMakeGenerate in Neovim
+```
+
+**Makefile projects:**
+```bash
+# Install bear: brew install bear
+bear -- make
+```
+
+**Single files:**
+Create `compile_flags.txt` in project root:
+```
+-std=c++17
+-Wall
+-Wextra
+```
+
+#### .clangd Configuration
+Create `.clangd` in project root for project-specific settings:
+```yaml
+CompileFlags:
+  Add: [-std=c++17, -Wall]
+  Remove: [-W*]
+
+Diagnostics:
+  ClangTidy:
+    Add: [modernize-*, performance-*]
+    Remove: [modernize-use-trailing-return-type]
+
+InlayHints:
+  Enabled: Yes
+  ParameterNames: Yes
+  DeducedTypes: Yes
+```
+
+#### .clang-format Configuration
+Create `.clang-format` for consistent formatting:
+```yaml
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 100
+```
+
+### Troubleshooting
+
+**clangd not starting:**
+- Run `:CppInfo` to check tool availability
+- Ensure clangd is in PATH: `which clangd`
+- Check `:LspInfo` for LSP status
+
+**No completions or diagnostics:**
+- Ensure `compile_commands.json` exists
+- Run `:CppGenerateCompileCommands`
+- Check clangd can find the file: `:LspLog`
+
+**Debugger not working:**
+- Install CodeLLDB via `:Mason`
+- Ensure executable is compiled with debug symbols (`-g` flag)
+- For CMake: use Debug build type
+
+**Header/Source switching fails:**
+- Ensure matching filenames (e.g., `foo.cpp` and `foo.hpp`)
+- Check standard directory structures (`src/`, `include/`)
+
+---
+
 ## Detailed Feature Guide
 
 ### File Explorer (`Ctrl+B`)
@@ -390,6 +618,7 @@ Intelligently handles different file types:
 │       ├── colorscheme.lua # OneDark theme
 │       ├── completion.lua  # nvim-cmp autocompletion
 │       ├── copilot.lua     # GitHub Copilot
+│       ├── cpp.lua         # C/C++ IDE (clangd, CMake, debugging)
 │       ├── git.lua         # LazyGit integration (floating window)
 │       ├── lsp.lua         # Language servers (modern vim.lsp.config)
 │       ├── nvim-tree.lua   # File explorer
@@ -476,6 +705,13 @@ Each plugin has its own configuration file for maintainability:
 - For FVM projects, ensure `.fvmrc` or `.fvm/fvm_config.json` exists
 - Test Flutter commands manually: `:FlutterDoctor` should run without errors
 
+**C/C++ Issues**
+- Run `:CppInfo` to check all C/C++ tool availability
+- Ensure clangd is installed: `which clangd`
+- Generate `compile_commands.json` with `:CppGenerateCompileCommands`
+- For debugging, install CodeLLDB via `:Mason`
+- Check LSP status with `<Leader>li` or `:LspInfo`
+
 ---
 
 ## Customization
@@ -514,9 +750,15 @@ Create new files in `lua/plugins/` or modify existing ones. The setup automatica
 - **Git** (for plugin management)
 - **Mason** (for LSP server installation)
 - **Node.js** (for TypeScript/Vue language servers)
-- **clangd** (for C/C++ support)
 - **Flutter SDK** (for Dart/Flutter development)
 - **FVM** (optional, for Flutter version management)
+
+### C/C++ Development Requirements
+- **clangd** (included with Xcode Command Line Tools or LLVM)
+- **CMake** (for CMake project support)
+- **Ninja** (optional, faster builds)
+- **CodeLLDB** (install via `:Mason` for debugging)
+- **bear** (optional, for generating compile_commands.json from Makefiles)
 
 ### External Dependencies
 - **telescope-fzf-native** requires `make`

@@ -119,13 +119,39 @@ return {
         },
       }
 
-      -- Configure Clang LSP
+      -- Configure Clang LSP with enhanced settings for C/C++ IDE
       vim.lsp.config.clangd = {
-        cmd = { 'clangd', '--background-index', '--clang-tidy' },
+        cmd = {
+          'clangd',
+          '--background-index',
+          '--clang-tidy',
+          '--header-insertion=iwyu',
+          '--completion-style=detailed',
+          '--function-arg-placeholders',
+          '--fallback-style=llvm',
+          '--all-scopes-completion',
+          '--pch-storage=memory',
+          '-j=4',
+        },
         filetypes = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'proto' },
-        root_markers = { '.clangd', '.clang-tidy', '.clang-format', 'compile_commands.json', 'compile_flags.txt', 'configure.ac', '.git' },
-        capabilities = capabilities,
-        on_attach = on_attach,
+        root_markers = { '.clangd', '.clang-tidy', '.clang-format', 'compile_commands.json', 'compile_flags.txt', 'configure.ac', 'CMakeLists.txt', 'Makefile', '.git' },
+        capabilities = (function()
+          local clangd_caps = vim.deepcopy(capabilities)
+          clangd_caps.offsetEncoding = { "utf-16" }
+          return clangd_caps
+        end)(),
+        on_attach = function(client, bufnr)
+          on_attach(client, bufnr)
+          -- Enable inlay hints if supported
+          if client.server_capabilities.inlayHintProvider then
+            vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+          end
+        end,
+        init_options = {
+          usePlaceholders = true,
+          completeUnimported = true,
+          clangdFileStatus = true,
+        },
       }
 
       -- NOTE: Dart LSP is handled by flutter-tools.nvim with fvm = true
@@ -192,11 +218,30 @@ return {
       vim.api.nvim_create_autocmd('FileType', {
         pattern = { 'c', 'cpp', 'objc', 'objcpp', 'cuda', 'proto' },
         callback = function(args)
+          local clangd_caps = vim.deepcopy(capabilities)
+          clangd_caps.offsetEncoding = { "utf-16" }
           vim.lsp.start({
             name = 'clangd',
-            cmd = { 'clangd', '--background-index', '--clang-tidy' },
-            root_dir = vim.fs.root(args.buf, { '.clangd', '.clang-tidy', '.clang-format', 'compile_commands.json', 'compile_flags.txt', 'configure.ac', '.git' }),
-            capabilities = capabilities,
+            cmd = {
+              'clangd',
+              '--background-index',
+              '--clang-tidy',
+              '--header-insertion=iwyu',
+              '--completion-style=detailed',
+              '--function-arg-placeholders',
+              '--fallback-style=llvm',
+              '--all-scopes-completion',
+              '--pch-storage=memory',
+              '-j=4',
+            },
+            root_dir = vim.fs.root(args.buf, { '.clangd', '.clang-tidy', '.clang-format', 'compile_commands.json', 'compile_flags.txt', 'configure.ac', 'CMakeLists.txt', 'Makefile', '.git' }),
+            capabilities = clangd_caps,
+            on_attach = on_attach,
+            init_options = {
+              usePlaceholders = true,
+              completeUnimported = true,
+              clangdFileStatus = true,
+            },
           })
         end,
       })
@@ -207,28 +252,39 @@ return {
       vim.diagnostic.config({
         virtual_text = {
           spacing = 4,
-          source = "always",
+          source = "if_many",
           prefix = "●",
         },
         float = {
-          focusable = false,
+          focusable = true,
           style = "minimal",
           border = "rounded",
           source = "always",
           header = "",
           prefix = "",
         },
-        signs = {
-          text = {
-            [vim.diagnostic.severity.ERROR] = "󰅚 ",
-            [vim.diagnostic.severity.WARN] = "󰀪 ",
-            [vim.diagnostic.severity.HINT] = "󰌶 ",
-            [vim.diagnostic.severity.INFO] = " ",
-          },
-        },
+        signs = true,
         underline = true,
         update_in_insert = false,
         severity_sort = true,
+      })
+
+      -- Define diagnostic signs
+      local signs = { Error = "", Warn = "", Hint = "", Info = "" }
+      for type, icon in pairs(signs) do
+        local hl = "DiagnosticSign" .. type
+        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
+      end
+
+      -- Force diagnostic refresh after text changes
+      vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI" }, {
+        pattern = { "*.c", "*.cpp", "*.h", "*.hpp", "*.cc", "*.cxx" },
+        callback = function()
+          -- Small delay to let clangd process changes
+          vim.defer_fn(function()
+            vim.diagnostic.show()
+          end, 500)
+        end,
       })
 
       -- Diagnostic keymaps

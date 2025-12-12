@@ -321,16 +321,7 @@ require("lazy").setup({
 })
 
 -- Auto-start LSP servers for different file types (immediate)
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'c', 'cpp', 'objc', 'objcpp' },
-  callback = function()
-    vim.lsp.start({
-      name = 'clangd',
-      cmd = { 'clangd', '--background-index', '--clang-tidy' },
-      root_dir = vim.fn.getcwd(),
-    })
-  end,
-})
+-- Note: C/C++ LSP is handled by lua/plugins/lsp.lua with enhanced clangd config
 
 vim.api.nvim_create_autocmd('FileType', {
   pattern = { 'vue' },
