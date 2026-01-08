@@ -18,7 +18,7 @@ return {
         ensure_installed = {
           'lua', 'vim', 'vimdoc', 'javascript', 'typescript', 'tsx',
           'html', 'css', 'json', 'python', 'c', 'cpp', 'vue', 'markdown',
-          'dart', 'yaml',
+          'dart', 'yaml', 'rust', 'toml',
         },
 
         sync_install = false,
@@ -31,6 +31,7 @@ return {
 
         indent = {
           enable = true,
+          disable = { "dart" },  -- Dart treesitter indent is buggy with Flutter widgets
         },
 
         incremental_selection = {
