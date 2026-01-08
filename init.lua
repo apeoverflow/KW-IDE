@@ -105,7 +105,6 @@ vim.api.nvim_exec([[
 
 map('n', '<C-n>', ':call OpenTerminal()<CR>', { desc = 'Open terminal' })
 map('t', '<C-x>', '<C-\\><C-n>', { noremap = true, silent = true })
-map('t', '<C-c>', '<C-\\><C-n>:q<CR>', { noremap = true, silent = true })
 
 -- Alt+hjkl to move between split/vsplit panels
 map('t', '<A-h>', '<C-\\><C-n><C-w>h', { noremap = true, silent = true })
