@@ -43,7 +43,7 @@ end
 
 _G.copy_current_file_path = function()
   local file_path = vim.fn.expand('%:p')
-  vim.fn.setreg('+', file_path)
+  vim.fn.system('pbcopy', file_path)
   print('File path copied to clipboard: ' .. file_path)
 end
 

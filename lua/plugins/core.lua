@@ -19,6 +19,10 @@ return {
     config = function()
       require('nvim-autopairs').setup({
         disable_filetype = { "TelescopePrompt", "vim" },
+        check_ts = true,  -- Use treesitter for smarter pairing
+        fast_wrap = {
+          map = '<M-e>',  -- Alt+e to wrap with pairs
+        },
       })
     end,
   },
