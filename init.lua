@@ -319,6 +319,8 @@ require("lazy").setup({
   },
 })
 
+require('config.autocmds')
+
 -- Auto-start LSP servers for different file types (immediate)
 -- Note: C/C++ LSP is handled by lua/plugins/lsp.lua with enhanced clangd config
 
