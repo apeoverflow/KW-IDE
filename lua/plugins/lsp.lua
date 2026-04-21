@@ -157,6 +157,15 @@ return {
       -- NOTE: Dart LSP is handled by flutter-tools.nvim with fvm = true
       -- Do not configure dartls here to avoid conflicts
 
+      -- Configure Solidity LSP (Nomic Foundation)
+      vim.lsp.config.solidity_ls = {
+        cmd = { 'nomicfoundation-solidity-language-server', '--stdio' },
+        filetypes = { 'solidity' },
+        root_markers = { 'hardhat.config.js', 'hardhat.config.ts', 'foundry.toml', 'remappings.txt', '.git' },
+        capabilities = capabilities,
+        on_attach = on_attach,
+      }
+
       -- Auto-enable LSP servers when opening relevant files
       vim.api.nvim_create_autocmd('FileType', {
         pattern = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact' },
@@ -247,6 +256,19 @@ return {
       })
 
       -- NOTE: Dart FileType autocmd removed - flutter-tools.nvim handles Dart LSP
+
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = { 'solidity' },
+        callback = function(args)
+          vim.lsp.start({
+            name = 'solidity_ls',
+            cmd = { 'nomicfoundation-solidity-language-server', '--stdio' },
+            root_dir = vim.fs.root(args.buf, { 'hardhat.config.js', 'hardhat.config.ts', 'foundry.toml', 'remappings.txt', '.git' }),
+            capabilities = capabilities,
+            on_attach = on_attach,
+          })
+        end,
+      })
 
       -- Configure diagnostics with more explicit settings
       vim.diagnostic.config({
