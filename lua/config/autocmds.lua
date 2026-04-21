@@ -92,6 +92,42 @@ _G.indentWithI = function()
   end
 end
 
+-- :Glow <path> — render a markdown file (path relative to project root) with glow in a split terminal
+vim.api.nvim_create_user_command('Glow', function(opts)
+  local root = vim.fs.root(0, { '.git' }) or vim.fn.getcwd()
+  local rel = opts.args
+  if rel == '' then
+    rel = vim.fn.expand('%:p')
+  end
+  local path = rel
+  if not vim.startswith(rel, '/') then
+    path = root .. '/' .. rel
+  end
+  if vim.fn.filereadable(path) == 0 then
+    vim.notify('Glow: file not found: ' .. path, vim.log.levels.ERROR)
+    return
+  end
+  vim.cmd('split')
+  vim.cmd('terminal glow -p ' .. vim.fn.shellescape(path))
+  vim.cmd('startinsert')
+end, {
+  nargs = '?',
+  desc = 'Render markdown with glow (path relative to project root)',
+  complete = function(arg_lead)
+    local root = vim.fs.root(0, { '.git' }) or vim.fn.getcwd()
+    local matches = vim.fn.globpath(root, arg_lead .. '*', false, true)
+    local results = {}
+    for _, m in ipairs(matches) do
+      local rel = m:sub(#root + 2)
+      if vim.fn.isdirectory(m) == 1 then
+        rel = rel .. '/'
+      end
+      table.insert(results, rel)
+    end
+    return results
+  end,
+})
+
 -- Setup treesitter after plugins are loaded
 vim.api.nvim_create_autocmd("User", {
   pattern = "VeryLazy",
