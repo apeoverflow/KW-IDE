@@ -2,7 +2,7 @@ return {
   {
     "zbirenbaum/copilot.lua",
     cmd = "Copilot",
-    event = "InsertEnter",
+    event = "VeryLazy",
     config = function()
       require('copilot').setup({
         panel = {
@@ -46,6 +46,7 @@ return {
           ["."] = false,
         },
         copilot_node_command = 'node',
+        auth_provider_url = 'https://pcs.ghe.com',
         server_opts_overrides = {},
       })
     end,
