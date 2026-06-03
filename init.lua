@@ -435,3 +435,37 @@ vim.defer_fn(function()
   end, { desc = 'Open main.dart' })
 
 end, 100)
+
+do
+  local function set_osc52_clipboard()
+    local ok, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
+    if not ok then return false end
+    vim.g.clipboard = {
+      name = 'OSC 52 (tmux/SSH)',
+      copy = { ['+'] = osc52.copy('+'), ['*'] = osc52.copy('+') },
+      paste = { ['+'] = osc52.paste('+'), ['*'] = osc52.paste('+') },
+    }
+    return true
+  end
+
+  local function set_mac_clipboard()
+    vim.g.clipboard = {
+      name = 'macOS',
+      copy = { ['+'] = 'pbcopy', ['*'] = 'pbcopy' },
+      paste = { ['+'] = 'pbpaste', ['*'] = 'pbpaste' },
+    }
+  end
+
+  set_mac_clipboard()
+
+  vim.api.nvim_create_user_command('ClipboardToggle', function()
+    if vim.g.clipboard and vim.g.clipboard.name:match('OSC') then
+      set_mac_clipboard()
+    else
+      set_osc52_clipboard()
+    end
+    vim.notify('Clipboard: ' .. vim.g.clipboard.name)
+  end, { desc = 'Toggle clipboard between macOS and OSC 52 (tmux/SSH)' })
+
+  map('n', '<leader>ct', '<cmd>ClipboardToggle<CR>', { desc = 'Toggle clipboard (mac/SSH)' })
+end
