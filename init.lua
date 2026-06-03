@@ -1,4 +1,5 @@
 -- Set leader keys first
+
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
@@ -437,34 +438,39 @@ vim.defer_fn(function()
 end, 100)
 
 do
-  local function set_osc52_clipboard()
-    local ok, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
-    if not ok then return false end
-    vim.g.clipboard = {
-      name = 'OSC 52 (tmux/SSH)',
-      copy = { ['+'] = osc52.copy('+'), ['*'] = osc52.copy('+') },
-      paste = { ['+'] = osc52.paste('+'), ['*'] = osc52.paste('+') },
-    }
-    return true
+  local use_osc52 = false
+  local osc52_copy = nil
+
+  local ok, osc52 = pcall(require, 'vim.ui.clipboard.osc52')
+  if ok then osc52_copy = osc52.copy('+') end
+
+  local function copy_func(lines, regtype)
+    if use_osc52 and osc52_copy then
+      return osc52_copy(lines, regtype)
+    end
+    local content = table.concat(lines, '\n')
+    vim.fn.system('pbcopy', content)
   end
 
-  local function set_mac_clipboard()
-    vim.g.clipboard = {
-      name = 'macOS',
-      copy = { ['+'] = 'pbcopy', ['*'] = 'pbcopy' },
-      paste = { ['+'] = 'pbpaste', ['*'] = 'pbpaste' },
-    }
+  local function paste_func()
+    if use_osc52 and osc52_copy then
+      local ok2, osc_paste = pcall(require, 'vim.ui.clipboard.osc52')
+      if ok2 then return osc_paste.paste('+')() end
+    end
+    local output = vim.fn.system('pbpaste')
+    return vim.split(output, '\n')
   end
 
-  set_mac_clipboard()
+  vim.g.clipboard = {
+    name = 'adaptive',
+    copy = { ['+'] = copy_func, ['*'] = copy_func },
+    paste = { ['+'] = paste_func, ['*'] = paste_func },
+  }
 
   vim.api.nvim_create_user_command('ClipboardToggle', function()
-    if vim.g.clipboard and vim.g.clipboard.name:match('OSC') then
-      set_mac_clipboard()
-    else
-      set_osc52_clipboard()
-    end
-    vim.notify('Clipboard: ' .. vim.g.clipboard.name)
+    use_osc52 = not use_osc52
+    local mode = use_osc52 and 'OSC 52 (SSH)' or 'macOS (pbcopy)'
+    vim.notify('Clipboard: ' .. mode)
   end, { desc = 'Toggle clipboard between macOS and OSC 52 (tmux/SSH)' })
 
   map('n', '<leader>ct', '<cmd>ClipboardToggle<CR>', { desc = 'Toggle clipboard (mac/SSH)' })
