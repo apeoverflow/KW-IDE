@@ -258,6 +258,30 @@ return {
       -- NOTE: Dart FileType autocmd removed - flutter-tools.nvim handles Dart LSP
 
       vim.api.nvim_create_autocmd('FileType', {
+        pattern = { 'zig' },
+        callback = function(args)
+          vim.lsp.start({
+            name = 'zls',
+            cmd = { 'zls' },
+            root_dir = vim.fs.root(args.buf, { 'build.zig', 'build.zig.zon', '.git' }),
+            capabilities = capabilities,
+            on_attach = function(client, bufnr)
+              on_attach(client, bufnr)
+              if client.server_capabilities.inlayHintProvider then
+                vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+              end
+            end,
+            settings = {
+              zls = {
+                enable_build_on_save = true,
+                build_on_save_step = "check",
+              },
+            },
+          })
+        end,
+      })
+
+      vim.api.nvim_create_autocmd('FileType', {
         pattern = { 'solidity' },
         callback = function(args)
           vim.lsp.start({
