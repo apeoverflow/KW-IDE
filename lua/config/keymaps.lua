@@ -142,3 +142,13 @@ map('n', '<leader>dk', function()
   print('NvimTree loaded: ' .. tostring(pcall(require, 'nvim-tree.api')))
   print('OpenTerminal exists: ' .. tostring(vim.fn.exists('*OpenTerminal') == 1))
 end, { desc = 'Debug keymaps' })
+
+-- Disable middle-click paste (avoids accidental PRIMARY-selection paste from
+-- ThinkPad trackpoint when mouse is forwarded through tmux+ssh)
+for _, m in ipairs({ 'n', 'i', 'v', 'c', 't' }) do
+  map(m, '<MiddleMouse>',   '<Nop>', options)
+  map(m, '<MiddleRelease>', '<Nop>', options)
+  map(m, '<2-MiddleMouse>', '<Nop>', options)
+  map(m, '<3-MiddleMouse>', '<Nop>', options)
+  map(m, '<4-MiddleMouse>', '<Nop>', options)
+end
